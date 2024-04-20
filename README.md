@@ -1,4 +1,4 @@
-# Geektime Rust 语言训练营
+# Rust 项目统一框架
 
 ## 环境设置
 
