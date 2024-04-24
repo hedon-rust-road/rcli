@@ -1,6 +1,6 @@
 // rcli csv -i input.csv -o output.json --header -d ','
 
-use std::fs::{self, read};
+use std::fs;
 
 use anyhow::Ok;
 use clap::Parser;

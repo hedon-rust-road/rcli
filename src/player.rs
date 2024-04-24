@@ -3,13 +3,13 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Player {
-    name: String,
-    position: String,
+    pub name: String,
+    pub position: String,
 
     #[serde(rename = "DOB")]
-    dob: String,
-    nationality: String,
+    pub dob: String,
+    pub nationality: String,
 
     #[serde(rename = "Kit Number")]
-    kit_number: String,
+    pub kit_number: String,
 }
