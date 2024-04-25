@@ -1,10 +1,7 @@
 use std::fs;
 
 use clap::{Parser, Subcommand};
-
-use crate::player::Player;
-
-mod player;
+use rcli::player::Player;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
