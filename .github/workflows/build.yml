@@ -54,8 +54,8 @@ jobs:
         run: |
           git fetch origin master:master
           git checkout master
-          sed -i '1,---d' NEW_CHANGELOG.md
-          sed -i '/---$/,$d' NEW_CHANGELOG.md
+          sed -i '' '1,/---/d' NEW_CHANGELOG.md
+          sed -i '' '/---$/,$d' NEW_CHANGELOG.md
           if [ -f "CHANGELOG.md" ]; then
             cat NEW_CHANGELOG.md CHANGELOG.md > TEMP_CHANGELOG.md && mv TEMP_CHANGELOG.md CHANGELOG.md
           else
