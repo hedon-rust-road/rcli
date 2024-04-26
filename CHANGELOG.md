@@ -1,4 +1,14 @@
----
+## [0.0.8-csv-genpass](https://github.com/hedon-rust-road/rcli/compare/v0.0.7-csv-genpass..v0.0.8-csv-genpass) - 2024-04-26
+
+### Bug Fixes
+
+- github action for clipp CHANGELOG.md - ([71adcd3](https://github.com/hedon-rust-road/rcli/commit/71adcd3984aa3a06736961bbc1b7573613581ed5)) - hedon954
+- append to master CHANGELOG.md instead of replacing it. - ([cd52081](https://github.com/hedon-rust-road/rcli/commit/cd520811880b4fc17f5ce14703abced26cfee491)) - hedon954
+
+### Other
+
+- Update CHANGELOG.md - ([992c754](https://github.com/hedon-rust-road/rcli/commit/992c754b7d5bc6df0f2c3cb3e6c53f11487fd096)) - GitHub Actions
+- Merge remote-tracking branch 'origin/master' - ([67a3327](https://github.com/hedon-rust-road/rcli/commit/67a33278c61f19c52a1ff660e7ea739c86ccc543)) - hedon954
 
 ## [0.0.7-csv-genpass](https://github.com/hedon-rust-road/rcli/compare/v0.0.6-csv-genpass..v0.0.7-csv-genpass) - 2024-04-26
 
