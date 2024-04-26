@@ -50,6 +50,14 @@ jobs:
           args: -vv --latest --strip header
         env:
           OUTPUT: CHANGELOG.md
+      - name: Commit and Push CHANGELOG.md
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md"
+          git push
+        if: startsWith(github.ref, 'refs/tags/') && steps.git-cliff.outputs.content != ''
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
