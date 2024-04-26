@@ -1,4 +1,5 @@
 ---
+
 ## [0.0.7-csv-genpass](https://github.com/hedon-rust-road/rcli/compare/v0.0.6-csv-genpass..v0.0.7-csv-genpass) - 2024-04-26
 
 ### Bug Fixes

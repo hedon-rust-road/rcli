@@ -49,15 +49,22 @@ jobs:
           config: cliff.toml
           args: -vv --latest --strip header
         env:
-          OUTPUT: CHANGELOG.md
-      - name: Commit and push CHANGELOG.md
+          OUTPUT: NEW_CHANGELOG.md
+      - name: Prepend new changelog to existing CHANGELOG.md
         run: |
+          git fetch origin master:master
+          git checkout master
+          if [ -f "CHANGELOG.md" ]; then
+            cat NEW_CHANGELOG.md CHANGELOG.md > TEMP_CHANGELOG.md && mv TEMP_CHANGELOG.md CHANGELOG.md
+          else
+            mv NEW_CHANGELOG.md CHANGELOG.md
+          fi
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
           git add CHANGELOG.md
-          git commit -m "Update CHANGELOG.md"
-          git push origin HEAD:${{ github.ref_name }} --force
-        if: startsWith(github.ref, 'refs/tags/')
+          git commit -m "Update CHANGELOG.md with new changes"
+          git push origin master --force
+        if: startsWith(github.ref, 'refs/tags/') && steps.git-cliff.outputs.content != ''
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
