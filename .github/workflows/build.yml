@@ -49,15 +49,15 @@ jobs:
           config: cliff.toml
           args: -vv --latest --strip header
         env:
-          OUTPUT: CHANGELOG.md
-      - name: Commit and Push CHANGELOG.md
+          OUTPUT: CHANGES.md
+      - name: Commit and push CHANGELOG.md
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'actions@github.com'
           git add CHANGELOG.md
           git commit -m "Update CHANGELOG.md"
-          git push origin HEAD:${{ steps.extract_branch.outputs.branch }}
-        if: startsWith(github.ref, 'refs/tags/') && steps.git-cliff.outputs.content != ''
+          git push origin HEAD:${{ github.ref_name }} --force
+        if: startsWith(github.ref, 'refs/tags/')
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
