@@ -12,15 +12,8 @@ pub struct CsvOpts {
     #[arg(short, long)]
     pub output: Option<String>,
 
-    /// CSV has header or not
-    #[arg(long, default_value_t = false)]
-    pub header: bool,
-
-    /// Delimiter
-    #[arg(short, long, default_value_t = ',')]
-    pub delimiter: char,
-
-    #[arg(long, value_parser = parse_format, default_value = "json")]
+    /// Output format
+    #[arg(long, value_enum, value_parser = parse_format, default_value = "json")]
     pub format: OutputFormat,
 }
 
