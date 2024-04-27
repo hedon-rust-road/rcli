@@ -1,11 +1,12 @@
-use std::{fmt, str::FromStr};
+use std::fmt;
 
-use clap::Parser;
+use crate::cli::verify_file;
+use clap::{Parser, ValueEnum};
 
 #[derive(Debug, Parser)]
 pub struct CsvOpts {
     /// Input file path
-    #[arg(short, long, value_parser = verify_input_file)]
+    #[arg(short, long, value_parser = verify_file)]
     pub input: String,
 
     /// Output file path
@@ -13,26 +14,14 @@ pub struct CsvOpts {
     pub output: Option<String>,
 
     /// Output format
-    #[arg(long, value_enum, value_parser = parse_format, default_value = "json")]
+    #[arg(long, value_enum, default_value_t = OutputFormat::Json)]
     pub format: OutputFormat,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 pub enum OutputFormat {
     Json,
     Yaml,
-}
-
-fn verify_input_file(filename: &str) -> Result<String, &'static str> {
-    if std::path::Path::new(filename).exists() {
-        Ok(filename.into())
-    } else {
-        Err("File dose not exists")
-    }
-}
-
-fn parse_format(format: &str) -> Result<OutputFormat, anyhow::Error> {
-    format.parse::<OutputFormat>()
 }
 
 impl From<OutputFormat> for &'static str {
@@ -40,16 +29,6 @@ impl From<OutputFormat> for &'static str {
         match value {
             OutputFormat::Json => "json",
             OutputFormat::Yaml => "yaml",
-        }
-    }
-}
-impl FromStr for OutputFormat {
-    type Err = anyhow::Error;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_lowercase().as_str() {
-            "json" => Ok(OutputFormat::Json),
-            "yaml" => Ok(OutputFormat::Yaml),
-            _ => Err(anyhow::anyhow!("Invalid format")),
         }
     }
 }

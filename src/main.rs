@@ -1,8 +1,11 @@
 use clap::Parser;
 use colored::*;
 use rcli::{
-    cli::{self},
-    process,
+    cli::{self, Base64SubCommand},
+    process::{
+        self,
+        b64::{process_decode, process_encode},
+    },
 };
 use zxcvbn::zxcvbn;
 
@@ -32,6 +35,14 @@ fn main() -> anyhow::Result<()> {
                 score.to_string().red(),
             )
         }
+        cli::SubCommand::Base64(opts) => match opts {
+            Base64SubCommand::Decode(opts) => {
+                process_decode(&opts.input, opts.format, opts.no_padding)?
+            }
+            Base64SubCommand::Encode(opts) => {
+                process_encode(&opts.input, opts.format, opts.no_padding)?
+            }
+        },
     }
     Ok(())
 }
