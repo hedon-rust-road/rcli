@@ -1,12 +1,15 @@
 use clap::Parser;
 use colored::*;
-use rcli::{opts, process};
+use rcli::{
+    cli::{self},
+    process,
+};
 use zxcvbn::zxcvbn;
 
 fn main() -> anyhow::Result<()> {
-    let opts = opts::Opts::parse();
+    let opts = cli::Opts::parse();
     match opts.cmd {
-        opts::SubCommand::Csv(opts) => {
+        cli::SubCommand::Csv(opts) => {
             let output = if let Some(output) = opts.output {
                 output
             } else {
@@ -14,7 +17,7 @@ fn main() -> anyhow::Result<()> {
             };
             process::csv_convert::process_csv(&opts.input, &output, opts.format)?
         }
-        opts::SubCommand::GenPass(opts) => {
+        cli::SubCommand::GenPass(opts) => {
             let password = process::gen_pass::process_genpass(
                 opts.length,
                 !opts.no_uppercase,
