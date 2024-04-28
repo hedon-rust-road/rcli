@@ -1,14 +1,18 @@
 pub mod base64;
 pub mod csv;
 pub mod gen_pass;
+pub mod text;
 pub mod time;
 
+use std::path::{Path, PathBuf};
+
+use self::time::TimeOpts;
 use clap::{Parser, Subcommand};
 
 pub use self::base64::Base64SubCommand;
-pub use self::csv::CsvOpts;
+pub use self::csv::{CsvOpts, OutputFormat};
 pub use self::gen_pass::GenPassOpts;
-use self::time::TimeOpts;
+pub use self::text::{TextSignFormat, TextSignOpts, TextSubCommand, TextVerifyOpts};
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -28,6 +32,8 @@ pub enum SubCommand {
     Base64(Base64SubCommand),
     #[command(about = "Time utils")]
     Time(TimeOpts),
+    #[command(subcommand, about = "Text sign & verify")]
+    Text(TextSubCommand),
 }
 
 fn verify_file(filename: &str) -> Result<String, &'static str> {
@@ -35,6 +41,15 @@ fn verify_file(filename: &str) -> Result<String, &'static str> {
         Ok(filename.into())
     } else {
         Err("File dose not exist")
+    }
+}
+
+fn verify_dir(path: &str) -> Result<PathBuf, &'static str> {
+    let p = Path::new(path);
+    if p.exists() && p.is_dir() {
+        Ok(path.into())
+    } else {
+        Err("Path does not exist or is not a directory")
     }
 }
 
