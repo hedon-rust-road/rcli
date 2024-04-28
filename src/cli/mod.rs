@@ -1,12 +1,14 @@
 pub mod base64;
 pub mod csv;
 pub mod gen_pass;
+pub mod time;
 
 use clap::{Parser, Subcommand};
 
 pub use self::base64::Base64SubCommand;
 pub use self::csv::CsvOpts;
 pub use self::gen_pass::GenPassOpts;
+use self::time::TimeOpts;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -24,6 +26,8 @@ pub enum SubCommand {
     GenPass(GenPassOpts),
     #[command(subcommand, about = "Base64 encode & decode")]
     Base64(Base64SubCommand),
+    #[command(about = "Time utils")]
+    Time(TimeOpts),
 }
 
 fn verify_file(filename: &str) -> Result<String, &'static str> {

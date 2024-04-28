@@ -5,6 +5,7 @@ use rcli::{
     process::{
         self,
         b64::{process_decode, process_encode},
+        time::process_unix_to_string,
     },
 };
 use zxcvbn::zxcvbn;
@@ -43,6 +44,7 @@ fn main() -> anyhow::Result<()> {
                 process_encode(&opts.input, opts.format, opts.no_padding)?
             }
         },
+        cli::SubCommand::Time(opts) => process_unix_to_string(opts.unix as i64)?,
     }
     Ok(())
 }
