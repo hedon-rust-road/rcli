@@ -1,7 +1,19 @@
 ### Test string file
-
 GET http://127.0.0.1:8080/examples/blake3.rs
 
 ### Test binary file
-
 GET http://127.0.0.1:8080/fixtures/ed25519.pk
+
+### Test directory
+GET http://127.0.0.1:8080/fixtures/
+
+
+### Test string file ---- tower
+GET http://127.0.0.1:8080/tower/examples/blake3.rs
+Range: bytes=100-
+
+### Test binary file ---- tower
+GET http://127.0.0.1:8080/tower/fixtures/ed25519.pk
+
+### Test directory ---- tower
+GET http://127.0.0.1:8080/tower/fixtures/

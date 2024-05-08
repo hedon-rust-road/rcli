@@ -11,3 +11,8 @@
 *.pdb
 
 output.*
+
+# In our rcli, the command `http serve` will generate index.html
+# for all sub directories for spefified directory.
+# So we decide to ignore them here.
+**/index.html
