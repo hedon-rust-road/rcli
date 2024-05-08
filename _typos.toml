@@ -1,4 +1,10 @@
 [default.extend-words]
 
 [files]
-extend-exclude = ["CHANGELOG.md", "notebooks/*", ".gitignore", "fixtures/*"]
+extend-exclude = [
+    "CHANGELOG.md",
+    "notebooks/*",
+    ".gitignore",
+    "fixtures/*",
+    "**/index.html",
+]

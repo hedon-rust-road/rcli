@@ -17,3 +17,7 @@ GET http://127.0.0.1:8080/tower/fixtures/ed25519.pk
 
 ### Test directory ---- tower
 GET http://127.0.0.1:8080/tower/fixtures/
+
+
+### Test file ---- tower
+GET http://127.0.0.1:8080/tower/LICENSE
