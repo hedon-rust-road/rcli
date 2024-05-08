@@ -1,0 +1,7 @@
+### Test string file
+
+GET http://127.0.0.1:8080/examples/blake3.rs
+
+### Test binary file
+
+GET http://127.0.0.1:8080/fixtures/ed25519.pk

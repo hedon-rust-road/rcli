@@ -1,11 +1,13 @@
 pub mod base64;
 pub mod csv;
 pub mod gen_pass;
+pub mod http;
 pub mod text;
 pub mod time;
 
 use std::path::{Path, PathBuf};
 
+use self::http::HttpSubCommand;
 use self::time::TimeOpts;
 use clap::{Parser, Subcommand};
 
@@ -34,6 +36,8 @@ pub enum SubCommand {
     Time(TimeOpts),
     #[command(subcommand, about = "Text sign & verify")]
     Text(TextSubCommand),
+    #[command(subcommand, about = "Http")]
+    Http(HttpSubCommand),
 }
 
 fn verify_file(filename: &str) -> Result<String, &'static str> {

@@ -6,13 +6,15 @@ use colored::*;
 use rcli::{
     cli::{self, Base64SubCommand, TextSubCommand},
     process::{
-        self, process_decode, process_encode, process_text_gen_key, process_text_sign,
-        process_text_verify, process_unix_to_string,
+        self, process_decode, process_encode, process_http_serve, process_text_gen_key,
+        process_text_sign, process_text_verify, process_unix_to_string,
     },
 };
 use zxcvbn::zxcvbn;
 
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt::init();
     let opts = cli::Opts::parse();
     match opts.cmd {
         cli::SubCommand::Csv(opts) => {
@@ -71,6 +73,11 @@ fn main() -> anyhow::Result<()> {
                         fs::write(dir.join("ed25519.pk"), &key[1])?;
                     }
                 }
+            }
+        },
+        cli::SubCommand::Http(cmd) => match cmd {
+            cli::http::HttpSubCommand::Serve(opts) => {
+                process_http_serve(opts.dir, opts.port).await?
             }
         },
     }
