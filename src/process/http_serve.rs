@@ -92,19 +92,14 @@ fn generate_indexes(dir: PathBuf, first: bool) -> anyhow::Result<()> {
 
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
+        let filename = entry.file_name().into_string().unwrap();
 
-        // Ignore index.html itself.
-        if entry
-            .file_name()
-            .into_string()
-            .unwrap()
-            .contains("index.html")
-        {
+        // Ignore `index.html` itself and `.git`.
+        if filename.contains("index.html") || filename.contains(".git") {
             continue;
         }
 
         let path = entry.path();
-        let filename = entry.file_name().into_string().unwrap();
         if path.is_dir() {
             html.push_str(&format!(
                 "<li><a href=\"./{}/\">{}/</a></li>\n",
