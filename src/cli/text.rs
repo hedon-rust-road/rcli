@@ -3,6 +3,7 @@ use std::{fs, path::PathBuf};
 use anyhow::Ok;
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::{Parser, ValueEnum};
+use enum_dispatch::enum_dispatch;
 
 use crate::{
     cli::{verify_dir, verify_file},
@@ -11,6 +12,7 @@ use crate::{
 };
 
 #[derive(Debug, Parser)]
+#[enum_dispatch(CmdExector)]
 pub enum TextSubCommand {
     #[command(about = "Sign a message with a private key")]
     Sign(TextSignOpts),
@@ -61,16 +63,6 @@ pub struct GenKeyOpts {
     pub format: TextSignFormat,
     #[arg(short, long, value_parser = verify_dir)]
     pub output: PathBuf,
-}
-
-impl CmdExector for TextSubCommand {
-    async fn execute(self) -> anyhow::Result<()> {
-        match self {
-            TextSubCommand::GenKey(opts) => opts.execute().await,
-            TextSubCommand::Sign(opts) => opts.execute().await,
-            TextSubCommand::Verify(opts) => opts.execute().await,
-        }
-    }
 }
 
 impl CmdExector for TextSignOpts {

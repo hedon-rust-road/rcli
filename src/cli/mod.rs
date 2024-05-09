@@ -5,16 +5,17 @@ pub mod http;
 pub mod text;
 pub mod time;
 
+use clap::{Parser, Subcommand};
+use enum_dispatch::enum_dispatch;
+
 use std::path::{Path, PathBuf};
 
-use self::http::HttpSubCommand;
-use self::time::TimeOpts;
-use clap::{Parser, Subcommand};
-
-pub use self::base64::Base64SubCommand;
-pub use self::csv::{CsvOpts, OutputFormat};
-pub use self::gen_pass::GenPassOpts;
-pub use self::text::{TextSignFormat, TextSignOpts, TextSubCommand, TextVerifyOpts};
+pub use self::base64::*;
+pub use self::csv::*;
+pub use self::gen_pass::*;
+pub use self::http::*;
+pub use self::text::*;
+pub use self::time::*;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
@@ -25,6 +26,7 @@ pub struct Opts {
 
 /// rcli csv -i input.csv -o output.json --header -d ','
 #[derive(Debug, Subcommand)]
+#[enum_dispatch(CmdExector)]
 pub enum SubCommand {
     #[command(name = "csv", about = "Show CSV, or convert CSV to other formats")]
     Csv(CsvOpts),
