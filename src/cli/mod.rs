@@ -36,7 +36,7 @@ pub enum SubCommand {
     Time(TimeOpts),
     #[command(subcommand, about = "Text sign & verify")]
     Text(TextSubCommand),
-    #[command(subcommand, about = "Http")]
+    #[command(subcommand, about = "Http server")]
     Http(HttpSubCommand),
 }
 

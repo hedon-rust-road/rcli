@@ -1,8 +1,14 @@
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
+use anyhow::Ok;
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
 use clap::{Parser, ValueEnum};
 
-use crate::cli::{verify_dir, verify_file};
+use crate::{
+    cli::{verify_dir, verify_file},
+    process::{process_text_gen_key, process_text_sign, process_text_verify},
+    CmdExector,
+};
 
 #[derive(Debug, Parser)]
 pub enum TextSubCommand {
@@ -55,4 +61,48 @@ pub struct GenKeyOpts {
     pub format: TextSignFormat,
     #[arg(short, long, value_parser = verify_dir)]
     pub output: PathBuf,
+}
+
+impl CmdExector for TextSubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            TextSubCommand::GenKey(opts) => opts.execute().await,
+            TextSubCommand::Sign(opts) => opts.execute().await,
+            TextSubCommand::Verify(opts) => opts.execute().await,
+        }
+    }
+}
+
+impl CmdExector for TextSignOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let sig = process_text_sign(&self.input, &self.key, self.format)?;
+        println!("\n{}", URL_SAFE_NO_PAD.encode(sig));
+        Ok(())
+    }
+}
+
+impl CmdExector for TextVerifyOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let sig = URL_SAFE_NO_PAD.decode(&self.sig)?;
+        process_text_verify(&self.input, &self.key, self.format, &sig)?;
+        Ok(())
+    }
+}
+
+impl CmdExector for GenKeyOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let key = process_text_gen_key(self.format)?;
+        match self.format {
+            TextSignFormat::Blake3 => {
+                let filename = &self.output.join("blake3.txt");
+                fs::write(filename, &key[0])?;
+            }
+            TextSignFormat::Ed25519 => {
+                let dir = &self.output;
+                fs::write(dir.join("ed25519.sk"), &key[0])?;
+                fs::write(dir.join("ed25519.pk"), &key[1])?;
+            }
+        }
+        Ok(())
+    }
 }

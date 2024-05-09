@@ -1,5 +1,10 @@
 use clap::{Parser, ValueEnum};
 
+use crate::{
+    process::{process_decode, process_encode},
+    CmdExector,
+};
+
 use super::verify_file;
 
 #[derive(Debug, Parser)]
@@ -40,4 +45,29 @@ pub struct Base64DecodeOpts {
 pub enum Base64Format {
     Standard,
     Urlsafe,
+}
+
+impl CmdExector for Base64SubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            Base64SubCommand::Decode(opts) => opts.execute().await,
+            Base64SubCommand::Encode(opts) => opts.execute().await,
+        }
+    }
+}
+
+impl CmdExector for Base64DecodeOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let encoded = process_decode(&self.input, self.format, self.no_padding)?;
+        println!("\n{}", String::from_utf8(encoded)?);
+        Ok(())
+    }
+}
+
+impl CmdExector for Base64EncodeOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let decoded = process_encode(&self.input, self.format, self.no_padding)?;
+        println!("\n{}", decoded);
+        Ok(())
+    }
 }

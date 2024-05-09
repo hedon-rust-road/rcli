@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::cli::verify_file;
+use crate::{cli::verify_file, process, CmdExector};
 use clap::{Parser, ValueEnum};
 
 #[derive(Debug, Parser)]
@@ -22,6 +22,17 @@ pub struct CsvOpts {
 pub enum OutputFormat {
     Json,
     Yaml,
+}
+
+impl CmdExector for CsvOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let output = if let Some(output) = self.output {
+            output
+        } else {
+            format!("output.{}", self.format)
+        };
+        process::csv_convert::process_csv(&self.input, &output, self.format)
+    }
 }
 
 impl From<OutputFormat> for &'static str {
