@@ -25,7 +25,7 @@ pub struct JwtSignOpts {
     #[arg(long)]
     pub aud: String,
     // Expiration Time, default time unit is `s`.
-    // Support time unit like `s(second)`, `m(minute)`, `h(hour)`, `d(day)`
+    // Support time unit like `s(second)`, `m(minute)`, `h(hour)`, `d(day)`.
     #[arg(long, required = false, value_parser = parse_exp, default_value_t = 7200)]
     pub exp: u32,
 }

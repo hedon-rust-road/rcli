@@ -2,12 +2,9 @@ use std::{fs, io::Read, path::Path};
 
 use anyhow::anyhow;
 
-use crate::process::process_genpass;
+use crate::process::{process_genpass, sign::TextSign, verify::TextVerify};
 
-use super::{
-    keygenerator::KeyGenerator, keyloader::KeyLoader, sign::TextSign, verify::TextVerify,
-    KEY_LENGTH,
-};
+use super::{keygenerator::KeyGenerator, keyloader::KeyLoader, KEY_LENGTH};
 
 pub struct Blake3 {
     key: [u8; 32],
