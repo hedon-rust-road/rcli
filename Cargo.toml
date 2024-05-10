@@ -19,6 +19,7 @@ colored = "2.1.0"
 csv = "1.3.0"
 ed25519-dalek = { version = "2.1.1", features = ["rand_core"] }
 enum_dispatch = "0.3.13"
+jwt = "0.16.0"
 rand = "0.8.5"
 serde = { version = "1.0.198", features = ["derive"] }
 serde_json = "1.0.116"

@@ -2,6 +2,7 @@ pub mod base64;
 pub mod csv;
 pub mod gen_pass;
 pub mod http;
+pub mod jwt;
 pub mod text;
 pub mod time;
 
@@ -14,6 +15,7 @@ pub use self::base64::*;
 pub use self::csv::*;
 pub use self::gen_pass::*;
 pub use self::http::*;
+pub use self::jwt::*;
 pub use self::text::*;
 pub use self::time::*;
 
@@ -40,6 +42,8 @@ pub enum SubCommand {
     Text(TextSubCommand),
     #[command(subcommand, about = "Http server")]
     Http(HttpSubCommand),
+    #[command(subcommand, about = "Jwt sign & verify")]
+    Jwt(JwtSubCommand),
 }
 
 fn verify_file(filename: &str) -> Result<String, &'static str> {
