@@ -8,7 +8,7 @@ use enum_dispatch::enum_dispatch;
 use crate::{
     cli::{verify_dir, verify_file},
     process::{
-        process_text_gen_key, process_text_sign, process_text_verify,
+        get_input, process_text_gen_key, process_text_sign, process_text_verify,
         text::{process_decrypt_text, process_encrypt_text},
     },
     CmdExector,
@@ -81,7 +81,7 @@ pub struct TextEncryptOpts {
     #[arg(long, default_value = "unique nonce")]
     pub nonce: String,
     /// The text to encrypt.
-    #[arg(required = true)]
+    #[arg(value_parser = verify_file, default_value = "-")]
     pub text: String,
 }
 
@@ -94,7 +94,7 @@ pub struct TextDecryptOpts {
     #[arg(long, default_value = "unique nonce")]
     pub nonce: String,
     /// The base64 text to decrypt.
-    #[arg(required = true)]
+    #[arg(value_parser = verify_file, default_value = "-")]
     pub text: String,
 }
 
@@ -134,14 +134,22 @@ impl CmdExector for TextGenKeyOpts {
 
 impl CmdExector for TextEncryptOpts {
     async fn execute(self) -> anyhow::Result<()> {
-        println!("{}", process_encrypt_text(self.key, self.nonce, self.text)?);
+        let text = get_input(&self.text)?;
+        println!(
+            "{}",
+            process_encrypt_text(self.key, self.nonce, text.as_slice())?
+        );
         Ok(())
     }
 }
 
 impl CmdExector for TextDecryptOpts {
     async fn execute(self) -> anyhow::Result<()> {
-        println!("{}", process_decrypt_text(self.key, self.nonce, self.text)?);
+        let text = get_input(&self.text)?;
+        println!(
+            "{}",
+            process_decrypt_text(self.key, self.nonce, text.as_slice())?
+        );
         Ok(())
     }
 }

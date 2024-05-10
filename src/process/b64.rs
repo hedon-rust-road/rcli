@@ -1,12 +1,10 @@
-use std::io::Read;
-
 use anyhow::Ok;
 use base64::engine::GeneralPurpose;
 use base64::prelude::*;
 use base64::Engine;
 
+use super::get_input;
 use crate::cli::base64::Base64Format;
-use crate::utils;
 
 pub fn process_encode(
     input: &str,
@@ -28,13 +26,6 @@ pub fn process_decode(
     let engine = get_decode_engine(format, no_padding);
     let res = engine.decode(buf)?;
     Ok(res)
-}
-
-fn get_input(input: &str) -> anyhow::Result<Vec<u8>> {
-    let mut reader = utils::get_reader(input)?;
-    let mut buf = Vec::new();
-    reader.read_to_end(&mut buf)?;
-    Ok(buf)
 }
 
 fn get_decode_engine(format: Base64Format, no_padding: bool) -> GeneralPurpose {
