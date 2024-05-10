@@ -58,7 +58,7 @@ impl Blake3 {
     pub fn try_new(key: &[u8]) -> anyhow::Result<Self> {
         if key.len() < KEY_LENGTH {
             return Err(anyhow!(
-                "[invalid key] the length of `key` cannot be less than 32"
+                "[invalid key] the length of `key` cannot be less than {KEY_LENGTH}"
             ));
         }
         let key = &key[..KEY_LENGTH];

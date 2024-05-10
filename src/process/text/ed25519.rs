@@ -52,9 +52,9 @@ impl KeyLoader for Ed25519Signer {
 impl TextVerify for Ed25519Verifier {
     fn verify(&self, mut reader: impl Read, sig: &[u8]) -> anyhow::Result<bool> {
         if sig.len() < SIG_LENGTH {
-            return Err(anyhow!(format!(
-                "[invalid signature] the length of `sig` cannot be less than 64"
-            )));
+            return Err(anyhow!(
+                "[invalid signature] the length of `sig` cannot be less than {SIG_LENGTH}"
+            ));
         }
         let sig = &sig[..SIG_LENGTH];
         let signature = Signature::from_bytes(sig.try_into()?);
@@ -101,9 +101,9 @@ impl Ed25519Verifier {
 
     pub fn try_new(key: &[u8]) -> anyhow::Result<Self> {
         if key.len() < KEY_LENGTH {
-            return Err(anyhow!(format!(
+            return Err(anyhow!(
                 "[invalid key] the length of `key` cannot be less than {KEY_LENGTH}"
-            )));
+            ));
         }
         let key = &key[..KEY_LENGTH];
         let key = key.try_into()?;

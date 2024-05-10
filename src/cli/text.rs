@@ -23,9 +23,9 @@ pub enum TextSubCommand {
     Verify(TextVerifyOpts),
     #[command(name = "genkey", about = "Generate a pair of key")]
     GenKey(TextGenKeyOpts),
-    #[command(about = "encrypt text with chacha20poly1305 and output in base64")]
+    #[command(about = "Encrypt text with chacha20poly1305 and output in base64")]
     Encrypt(TextEncryptOpts),
-    #[command(about = "decrypt the base64 text with chacha20poly1305")]
+    #[command(about = "Decrypt the base64 text with chacha20poly1305")]
     Decrypt(TextDecryptOpts),
 }
 
@@ -74,26 +74,24 @@ pub struct TextGenKeyOpts {
 
 #[derive(Debug, Parser)]
 pub struct TextEncryptOpts {
-    /// The key for chacha30poly1305.
-    #[arg(long, required = true)]
+    /// The key for chacha30poly1305, if not specifies,
+    /// it would be randomly generated than set at the head of the response.
+    #[arg(long, default_value = "-")]
     pub key: String,
-    /// The unique nonce.
-    #[arg(long, default_value = "unique nonce")]
-    pub nonce: String,
-    /// The text to encrypt.
+    /// The text to encrypt,
+    /// support both stdin[-] and file.
     #[arg(value_parser = verify_file, default_value = "-")]
     pub text: String,
 }
 
 #[derive(Debug, Parser)]
 pub struct TextDecryptOpts {
-    /// The key for chacha30poly1305.
-    #[arg(long, required = true)]
+    /// The key for chacha30poly1305,
+    /// if not specifies means it's in the head of the text.
+    #[arg(long, default_value = "-")]
     pub key: String,
-    /// The unique nonce.
-    #[arg(long, default_value = "unique nonce")]
-    pub nonce: String,
-    /// The base64 text to decrypt.
+    /// The base64 text to decrypt,
+    /// support both stdin[-] and file.
     #[arg(value_parser = verify_file, default_value = "-")]
     pub text: String,
 }
@@ -136,8 +134,8 @@ impl CmdExector for TextEncryptOpts {
     async fn execute(self) -> anyhow::Result<()> {
         let text = get_input(&self.text)?;
         println!(
-            "{}",
-            process_encrypt_text(self.key, self.nonce, text.as_slice())?
+            "\n{}",
+            process_encrypt_text(self.key.as_bytes(), text.as_slice())?
         );
         Ok(())
     }
@@ -147,8 +145,8 @@ impl CmdExector for TextDecryptOpts {
     async fn execute(self) -> anyhow::Result<()> {
         let text = get_input(&self.text)?;
         println!(
-            "{}",
-            process_decrypt_text(self.key, self.nonce, text.as_slice())?
+            "\n{}",
+            process_decrypt_text(self.key.as_bytes(), text.as_slice())?
         );
         Ok(())
     }

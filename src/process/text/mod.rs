@@ -1,4 +1,5 @@
 pub mod blake3;
+pub mod chacha20_poly1305;
 pub mod decrypt;
 pub mod ed25519;
 pub mod encrypt;
@@ -9,17 +10,18 @@ pub mod verify;
 
 use anyhow::{anyhow, Ok};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
-use chacha20poly1305::{
-    aead::{Aead, KeyInit},
-    ChaCha20Poly1305, Key, Nonce,
-};
 use colored::*;
 
 use crate::{cli::TextSignFormat, utils::get_reader};
 
 use self::{
     blake3::Blake3,
+    chacha20_poly1305::{
+        Chacha20Poly1305Decryptor, Chacha20Poly1305Encryptor, NONCE_LENGTH, RAND_FLAG,
+    },
+    decrypt::Decrypt,
     ed25519::{Ed25519Signer, Ed25519Verifier},
+    encrypt::Encrypt,
     keygenerator::KeyGenerator,
     keyloader::KeyLoader,
     sign::TextSign,
@@ -70,28 +72,39 @@ pub fn process_text_gen_key(format: TextSignFormat) -> anyhow::Result<Vec<Vec<u8
     }
 }
 
-pub fn process_encrypt_text(key: String, nonce: String, text: &[u8]) -> anyhow::Result<String> {
-    let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
-    let nonce = Nonce::from_slice(nonce.as_bytes()); // 96-bits; unique per message
-    let ciphertext = cipher
-        .encrypt(nonce, text)
-        .map_err(|e| anyhow!("encrypt error: {}", e))?;
-    Ok(URL_SAFE_NO_PAD.encode(ciphertext))
+pub fn process_encrypt_text(key: &[u8], mut text: &[u8]) -> anyhow::Result<String> {
+    let en = Chacha20Poly1305Encryptor::try_new(key)?;
+    let mut res = en.encrypt(&mut text)?;
+    if key == RAND_FLAG {
+        let mut tmp = en.get_key();
+        tmp.extend(res);
+        res = tmp;
+    }
+    Ok(URL_SAFE_NO_PAD.encode(res))
 }
 
-pub fn process_decrypt_text(key: String, nonce: String, text: &[u8]) -> anyhow::Result<String> {
+pub fn process_decrypt_text(key: &[u8], text: &[u8]) -> anyhow::Result<String> {
     let binary = URL_SAFE_NO_PAD.decode(text)?;
-    let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
-    let nonce = Nonce::from_slice(nonce.as_bytes()); // 96-bits; unique per message
-    let res = cipher
-        .decrypt(nonce, binary.as_ref())
-        .map_err(|e| anyhow!("decrypt error: {}", e))?;
+    let de;
+    let res;
+    if key == RAND_FLAG {
+        if binary.len() <= KEY_LENGTH + NONCE_LENGTH {
+            return Err(anyhow!("[invalid text] not contains key or nonce"));
+        }
+        de = Chacha20Poly1305Decryptor::try_new(&binary[..KEY_LENGTH])?;
+        let mut tmp = &binary[KEY_LENGTH..];
+        res = de.decrypt(&mut tmp)?;
+    } else {
+        de = Chacha20Poly1305Decryptor::try_new(key)?;
+        res = de.decrypt(&mut binary.as_slice())?;
+    }
+
     Ok(String::from_utf8(res)?)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::process::text::{process_encrypt_text, TextVerify};
+    use crate::process::text::{chacha20_poly1305::RAND_FLAG, process_encrypt_text, TextVerify};
 
     use super::{process_decrypt_text, Blake3, Ed25519Signer, Ed25519Verifier, TextSign};
 
@@ -120,11 +133,20 @@ mod tests {
 
     #[test]
     fn test_encrypt_decrypt() -> anyhow::Result<()> {
-        let key = "noncenoncenoncenoncenoncenonce11".to_string();
-        let nonce = "noncenonce11".to_string();
-        let res = process_encrypt_text(key.clone(), nonce.clone(), b"1")?;
+        let key = b"noncenoncenoncenoncenoncenonce11";
+        let res = process_encrypt_text(key, b"1")?;
         println!("{}", res);
-        let res = process_decrypt_text(key.clone(), nonce.clone(), res.as_bytes())?;
+        let res = process_decrypt_text(key, res.as_bytes())?;
+        println!("{}", res);
+        Ok(())
+    }
+
+    #[test]
+    fn test_encrypt_decrypt_without_key() -> anyhow::Result<()> {
+        let key = RAND_FLAG;
+        let res = process_encrypt_text(key, b"1")?;
+        println!("{}", res);
+        let res = process_decrypt_text(key, res.as_bytes())?;
         println!("{}", res);
         Ok(())
     }
