@@ -2,7 +2,14 @@ use clap::Parser;
 use enum_dispatch::enum_dispatch;
 
 use super::verify_file;
-use crate::CmdExector;
+use crate::{
+    process::{
+        get_input,
+        jwt::{process_jwt_sign, process_jwt_verify},
+    },
+    utils::print_verify_result,
+    CmdExector,
+};
 
 #[derive(Debug, Parser)]
 #[enum_dispatch(CmdExector)]
@@ -27,7 +34,7 @@ pub struct JwtSignOpts {
     // Expiration Time, default time unit is `s`.
     // Support time unit like `s(second)`, `m(minute)`, `h(hour)`, `d(day)`.
     #[arg(long, required = false, value_parser = parse_exp, default_value_t = 7200)]
-    pub exp: u32,
+    pub exp: u64,
 }
 
 #[derive(Debug, Parser)]
@@ -40,9 +47,9 @@ pub struct JwtVerifyOpts {
     pub jwt: String,
 }
 
-fn parse_exp(duration: &str) -> Result<u32, String> {
+fn parse_exp(duration: &str) -> Result<u64, String> {
     let duration = duration.to_lowercase();
-    let mut total_second: u32 = 0;
+    let mut total_second: u64 = 0;
     let mut current_number = String::new();
     for ch in duration.chars() {
         if ch.is_ascii_digit() {
@@ -55,7 +62,7 @@ fn parse_exp(duration: &str) -> Result<u32, String> {
                 'd' => 24 * 60 * 60,
                 _ => return Err("invalid exp".to_string()),
             };
-            let value: u32 = current_number
+            let value: u64 = current_number
                 .parse()
                 .map_err(|e| format!("{}", e).to_string())?;
             total_second += value * multiplier;
@@ -64,7 +71,7 @@ fn parse_exp(duration: &str) -> Result<u32, String> {
     }
 
     if !current_number.is_empty() {
-        let value: u32 = current_number
+        let value: u64 = current_number
             .parse()
             .map_err(|e| format!("{}", e).to_string())?;
         total_second += value;
@@ -74,12 +81,20 @@ fn parse_exp(duration: &str) -> Result<u32, String> {
 
 impl CmdExector for JwtSignOpts {
     async fn execute(self) -> anyhow::Result<()> {
+        let key = get_input(&self.key)?;
+        let key = key.as_slice();
+        let res = process_jwt_sign(key, self.sub, self.aud, self.exp)?;
+        println!("\n{res}");
         Ok(())
     }
 }
 
 impl CmdExector for JwtVerifyOpts {
     async fn execute(self) -> anyhow::Result<()> {
+        let key = get_input(&self.key)?;
+        let key = key.as_slice();
+        let res = process_jwt_verify(key, self.jwt)?;
+        print_verify_result(res);
         Ok(())
     }
 }

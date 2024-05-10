@@ -10,9 +10,11 @@ pub mod verify;
 
 use anyhow::{anyhow, Ok};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
-use colored::*;
 
-use crate::{cli::TextSignFormat, utils::get_reader};
+use crate::{
+    cli::TextSignFormat,
+    utils::{get_reader, print_verify_result},
+};
 
 use self::{
     blake3::Blake3,
@@ -55,13 +57,7 @@ pub fn process_text_verify(
         TextSignFormat::Blake3 => Blake3::load(key)?.verify(&mut reader, sig)?,
         TextSignFormat::Ed25519 => Ed25519Verifier::load(key)?.verify(&mut reader, sig)?,
     };
-
-    if res {
-        println!("\n{}", "√ Signature verified".green())
-    } else {
-        println!("\n{}", "x Signature not verified".red())
-    }
-
+    print_verify_result(res);
     Ok(())
 }
 
