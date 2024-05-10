@@ -7,7 +7,10 @@ use enum_dispatch::enum_dispatch;
 
 use crate::{
     cli::{verify_dir, verify_file},
-    process::{process_text_gen_key, process_text_sign, process_text_verify},
+    process::{
+        process_text_gen_key, process_text_sign, process_text_verify,
+        text::{process_decrypt_text, process_encrypt_text},
+    },
     CmdExector,
 };
 
@@ -19,7 +22,11 @@ pub enum TextSubCommand {
     #[command(about = "Veriy a signed message with a private/public key")]
     Verify(TextVerifyOpts),
     #[command(name = "genkey", about = "Generate a pair of key")]
-    GenKey(GenKeyOpts),
+    GenKey(TextGenKeyOpts),
+    #[command(about = "encrypt text with chacha20poly1305 and output in base64")]
+    Encrypt(TextEncryptOpts),
+    #[command(about = "decrypt the base64 text with chacha20poly1305")]
+    Decrypt(TextDecryptOpts),
 }
 
 #[derive(Debug, Parser)]
@@ -58,11 +65,37 @@ pub struct TextVerifyOpts {
 }
 
 #[derive(Debug, Parser)]
-pub struct GenKeyOpts {
+pub struct TextGenKeyOpts {
     #[arg(long, value_enum, default_value_t = TextSignFormat::Blake3)]
     pub format: TextSignFormat,
     #[arg(short, long, value_parser = verify_dir)]
     pub output: PathBuf,
+}
+
+#[derive(Debug, Parser)]
+pub struct TextEncryptOpts {
+    /// The key for chacha30poly1305.
+    #[arg(long, required = true)]
+    pub key: String,
+    /// The unique nonce.
+    #[arg(long, default_value = "unique nonce")]
+    pub nonce: String,
+    /// The text to encrypt.
+    #[arg(required = true)]
+    pub text: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct TextDecryptOpts {
+    /// The key for chacha30poly1305.
+    #[arg(long, required = true)]
+    pub key: String,
+    /// The unique nonce.
+    #[arg(long, default_value = "unique nonce")]
+    pub nonce: String,
+    /// The base64 text to decrypt.
+    #[arg(required = true)]
+    pub text: String,
 }
 
 impl CmdExector for TextSignOpts {
@@ -81,7 +114,7 @@ impl CmdExector for TextVerifyOpts {
     }
 }
 
-impl CmdExector for GenKeyOpts {
+impl CmdExector for TextGenKeyOpts {
     async fn execute(self) -> anyhow::Result<()> {
         let key = process_text_gen_key(self.format)?;
         match self.format {
@@ -95,6 +128,20 @@ impl CmdExector for GenKeyOpts {
                 fs::write(dir.join("ed25519.pk"), &key[1])?;
             }
         }
+        Ok(())
+    }
+}
+
+impl CmdExector for TextEncryptOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        println!("{}", process_encrypt_text(self.key, self.nonce, self.text)?);
+        Ok(())
+    }
+}
+
+impl CmdExector for TextDecryptOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        println!("{}", process_decrypt_text(self.key, self.nonce, self.text)?);
         Ok(())
     }
 }

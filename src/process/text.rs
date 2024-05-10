@@ -1,9 +1,13 @@
 use std::{fs, io::Read, path::Path};
 
 use anyhow::{anyhow, Ok};
+use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
+use chacha20poly1305::{
+    aead::{Aead, KeyInit, OsRng},
+    ChaCha20Poly1305, Key, Nonce,
+};
 use colored::*;
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
-use rand::rngs::OsRng;
 
 use crate::{cli::TextSignFormat, process::process_genpass, utils::get_reader};
 
@@ -235,11 +239,30 @@ pub fn process_text_gen_key(format: TextSignFormat) -> anyhow::Result<Vec<Vec<u8
     }
 }
 
+pub fn process_encrypt_text(key: String, nonce: String, text: String) -> anyhow::Result<String> {
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
+    let nonce = Nonce::from_slice(nonce.as_bytes()); // 96-bits; unique per message
+    let ciphertext = cipher
+        .encrypt(nonce, text.as_bytes().as_ref())
+        .map_err(|e| anyhow!("encrypt error: {}", e))?;
+    Ok(URL_SAFE_NO_PAD.encode(ciphertext))
+}
+
+pub fn process_decrypt_text(key: String, nonce: String, text: String) -> anyhow::Result<String> {
+    let binary = URL_SAFE_NO_PAD.decode(text)?;
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(key.as_bytes()));
+    let nonce = Nonce::from_slice(nonce.as_bytes()); // 96-bits; unique per message
+    let res = cipher
+        .decrypt(nonce, binary.as_ref())
+        .map_err(|e| anyhow!("decrypt error: {}", e))?;
+    Ok(String::from_utf8(res)?)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::process::text::TextVerify;
+    use crate::process::text::{process_encrypt_text, TextVerify};
 
-    use super::{Blake3, Ed25519Signer, Ed25519Verifier, TextSign};
+    use super::{process_decrypt_text, Blake3, Ed25519Signer, Ed25519Verifier, TextSign};
 
     #[test]
     fn test_blake3_sign_verify() -> anyhow::Result<()> {
@@ -261,6 +284,17 @@ mod tests {
         let verifier = Ed25519Verifier::try_new(pk)?;
         let signed_res = signer.sign(&mut &data[..])?;
         assert!(verifier.verify(&mut &data[..], &signed_res)?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_encrypt_decrypt() -> anyhow::Result<()> {
+        let key = "noncenoncenoncenoncenoncenonce11".to_string();
+        let nonce = "noncenonce11".to_string();
+        let res = process_encrypt_text(key.clone(), nonce.clone(), "1".to_string())?;
+        println!("{}", res);
+        let res = process_decrypt_text(key.clone(), nonce.clone(), res)?;
+        println!("{}", res);
         Ok(())
     }
 }
