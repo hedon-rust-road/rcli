@@ -1,8 +1,9 @@
 use std::{fs, io::Read, path::Path};
 
-use crate::process::{sign::TextSign, verify::TextVerify};
-
-use super::{keygenerator::KeyGenerator, keyloader::KeyLoader, KEY_LENGTH, SIG_LENGTH};
+use super::{
+    keygenerator::KeyGenerator, keyloader::KeyLoader, sign::TextSign, verify::TextVerify,
+    KEY_LENGTH, SIG_LENGTH,
+};
 use anyhow::anyhow;
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use rand::rngs::OsRng;

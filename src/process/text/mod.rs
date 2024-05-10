@@ -5,6 +5,8 @@ pub mod ed25519;
 pub mod encrypt;
 pub mod keygenerator;
 pub mod keyloader;
+pub mod sign;
+pub mod verify;
 
 use anyhow::{anyhow, Ok};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine};
@@ -22,9 +24,9 @@ use self::{
     encrypt::Encrypt,
     keygenerator::KeyGenerator,
     keyloader::KeyLoader,
+    sign::TextSign,
+    verify::TextVerify,
 };
-
-use super::{sign::TextSign, verify::TextVerify};
 
 const KEY_LENGTH: usize = 32;
 const SIG_LENGTH: usize = 64;
@@ -102,10 +104,8 @@ pub fn process_decrypt_text(key: &[u8], text: &[u8]) -> anyhow::Result<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::process::{
-        sign::TextSign,
-        text::{chacha20_poly1305::RAND_FLAG, process_encrypt_text},
-        verify::TextVerify,
+    use crate::process::text::{
+        chacha20_poly1305::RAND_FLAG, process_encrypt_text, sign::TextSign, verify::TextVerify,
     };
 
     use super::{process_decrypt_text, Blake3, Ed25519Signer, Ed25519Verifier};
