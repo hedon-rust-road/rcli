@@ -1,83 +1,105 @@
-# Rust 项目统一框架
+# RCLI (Rust CLI)
 
-## 环境设置
+A command-line interface (CLI) tool implemented in Rust for various utility tasks.
 
-### 安装 Rust
+## Installation
 
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
+1. Clone this repository.
+2. Navigate to the project directory.
+3. Build the project using `cargo build --release`.
+4. The binary file will be available in the `target/release` directory.
 
-### 安装 VSCode 插件
-
-- crates: Rust 包管理
-- Even Better TOML: TOML 文件支持
-- Better Comments: 优化注释显示
-- Error Lens: 错误提示优化
-- GitLens: Git 增强
-- Github Copilot: 代码提示
-- indent-rainbow: 缩进显示优化
-- Prettier - Code formatter: 代码格式化
-- REST client: REST API 调试
-- rust-analyzer: Rust 语言支持
-- Rust Test lens: Rust 测试支持
-- Rust Test Explorer: Rust 测试概览
-- TODO Highlight: TODO 高亮
-- vscode-icons: 图标优化
-- YAML: YAML 文件支持
-
-### 安装 cargo generate
-
-cargo generate 是一个用于生成项目模板的工具。它可以使用已有的 github repo 作为模版生成新的项目。
+## Usage
 
 ```bash
-cargo install cargo-generate
+Usage: rcli <COMMAND>
+
+Commands:
+  csv      Show CSV, or convert CSV to other formats
+  genpass  Generate a password
+  base64   Base64 encode & decode
+  time     Time utils
+  text     Text sign & verify
+  http     Http server
+  jwt      Jwt sign & verify
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
-使用 `hedon-rust-road/template` 模版生成基本的代码：
+### Commands:
 
-```bash
-cargo generate hedon-rust-road/template
+- `csv`: Convert CSV to other formats.
+- `genpass`: Generate a password.
+- `base64`: Base64 encode & decode.
+- `time`: Time utilities.
+- `text`: Text signing & verification.
+- `http`: HTTP server.
+- `jwt`: JWT signing & verification.
+
+For help on a specific command, use:
+
+```sh
+rcli <COMMAND> -h
 ```
 
-### 安装 pre-commit
+### Options:
 
-pre-commit 是一个代码检查工具，可以在提交代码前进行代码检查。
+- `-h, --help`: Print help.
+- `-V, --version`: Print version.
 
-```bash
-pipx install pre-commit
+## Examples
+
+### Convert CSV data to Json
+
+```sh
+rcli csv --input <INPUT> --format json
 ```
 
-安装成功后运行 `pre-commit install` 即可。
+This will convert the CSV data to JSON format.
 
-### 安装 Cargo deny
+### Generate a password
 
-Cargo deny 是一个 Cargo 插件，可以用于检查依赖的安全性。
-
-```bash
-cargo install --locked cargo-deny
+```sh
+rcli genpass --length 16 --no-uppercase --no-symbol
 ```
 
-### 安装 typos
+This will generate a 16-character password without uppercase letters and symbols.
 
-typos 是一个拼写检查工具。
+### Encode a string to Base64
 
-```bash
-cargo install typos-cli
+```sh
+rcli base64 encode "Hello, world!"
 ```
 
-### 安装 git cliff
+This will encode the string "Hello, world!" to Base64.
 
-git cliff 是一个生成 changelog 的工具。
+### Time utilities
 
-```bash
-cargo install git-cliff
+```sh
+rcli time
 ```
 
-### 安装 cargo nextest
+This will display the current Unix timestamp.
 
-cargo nextest 是一个 Rust 增强测试工具。
+### Sign a message
 
-```bash
-cargo install cargo-nextest --locked
+```sh
+rcli text sign "Message to sign" <PRIVATE_KEY_FILE>
 ```
+
+This will sign the message "Message to sign" using the specified private key file.
+
+### Generate a JWT
+
+```sh
+rcli jwt sign --sub <SUB> --aud <AUD> --exp [EXP] [KEY]
+```
+
+This will generate a JWT using the specified sub, aud, exp and private key file.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
